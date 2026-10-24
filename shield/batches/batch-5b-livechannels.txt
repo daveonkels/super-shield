@@ -1,0 +1,2 @@
+# Batch 5b: Live Channels (no HDMI/tuner inputs on a Shield; owner does not use it)
+com.google.android.tv

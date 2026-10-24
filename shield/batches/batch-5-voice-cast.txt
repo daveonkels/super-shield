@@ -1,0 +1,5 @@
+# Batch 5: Assistant, speech, Chromecast built-in, Live Channels (owner does not use them)
+com.google.android.katniss
+com.google.android.speech.pumpkin
+com.google.android.apps.mediashell
+com.google.android.tv

@@ -19,3 +19,10 @@ traces/
 *.aab
 launcher/hs_err_pid*.log
 launcher/replay_pid*.log
+
+# Super Shield: local tooling state and secrets never leave this machine
+.claude/
+**/.claude/
+addons/*/local.properties
+# the Home Assistant token file lives in backup/ (ignored above); keep any stray copy out too
+*secret*.json

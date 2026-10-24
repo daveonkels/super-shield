@@ -1,0 +1,6 @@
+# Batch 4: apps the owner does not use
+com.google.android.youtube.tvmusic
+com.amazon.music.tv
+air.com.vudu.air.DownloaderTablet
+com.google.android.videos
+com.google.android.play.games

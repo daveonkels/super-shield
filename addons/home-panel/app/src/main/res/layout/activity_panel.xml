@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Placed where the launcher's quick settings panel sits, so it reads as the same family. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrim"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/panel"
+        android:layout_width="260dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="105dp"
+        android:layout_marginEnd="56dp"
+        android:orientation="vertical"
+        android:background="@drawable/glass_panel"
+        android:padding="6dp"
+        android:elevation="12dp">
+
+        <!-- Outside temperature: large and thin, like the launcher's clock. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="2dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/outside"
+                android:textColor="#B3FFFFFF"
+                android:textSize="13sp"
+                android:textAllCaps="true"
+                android:letterSpacing="0.18"
+                android:fontFamily="@string/font_medium" />
+
+            <TextView
+                android:id="@+id/temperature"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFFFF"
+                android:textSize="34sp"
+                android:fontFamily="@string/font_extralight" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/rows"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </LinearLayout>
+</FrameLayout>

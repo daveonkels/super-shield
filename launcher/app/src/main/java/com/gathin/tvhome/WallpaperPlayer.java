@@ -1,10 +1,13 @@
 package com.gathin.tvhome;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.ColorMatrixColorFilter;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -46,6 +49,12 @@ final class WallpaperPlayer {
     private final int height;
     /** wallpaper_dim as an ARGB black, painted into each picture once instead of a full-screen shade view. */
     private final int dimColor;
+    /** wallpaper_tint in percent: how far the picture shifts toward the focused app's colour; 0 is off. */
+    private final int tint;
+    private final boolean animateTint;
+    private int tintTarget;
+    private int tintShown;
+    private ValueAnimator tintAnimator;
     /** The picture on screen, released once the next one has been drawn. */
     private Bitmap current;
     private boolean active;
@@ -70,6 +79,8 @@ final class WallpaperPlayer {
         bitmapConfig = config.wallpaperTrueColor ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
         // The dim is painted into the picture (decode), so no full-screen shade layer is drawn on every frame.
         dimColor = config.wallpaperDim > 0 ? (config.wallpaperDim * 255 / 100) << 24 : 0;
+        tint = config.wallpaperTint;
+        animateTint = config.animations && !config.reducedMotion;
         order = config.wallpaperOrder;
         preferences = context.getSharedPreferences("wallpaper_rotation", Context.MODE_PRIVATE);
         moods = config.wallpaperMoods;
@@ -162,7 +173,31 @@ final class WallpaperPlayer {
     void close() {
         active = false;
         closed = true;
+        if (tintAnimator != null) tintAnimator.cancel();
         decoder.shutdownNow();
+    }
+
+    /**
+     * wallpaper_tint: shifts the picture toward the focused app's colour, fading from the colour on screen over
+     * half a second (at once without animations). A colour filter on the image view, so the GPU does the work.
+     */
+    void tint(int color) {
+        if (tint == 0 || image.getParent() == null || color == tintTarget) return;
+        tintTarget = color;
+        if (tintAnimator != null) tintAnimator.cancel();
+        if (!animateTint || tintShown == 0) {
+            applyTint(color);
+            return;
+        }
+        tintAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), tintShown, color);
+        tintAnimator.setDuration(500);
+        tintAnimator.addUpdateListener(a -> applyTint((int) a.getAnimatedValue()));
+        tintAnimator.start();
+    }
+
+    private void applyTint(int color) {
+        tintShown = color;
+        image.setColorFilter(new ColorMatrixColorFilter(WallpaperTint.matrix(color, tint)));
     }
 
     void update() {

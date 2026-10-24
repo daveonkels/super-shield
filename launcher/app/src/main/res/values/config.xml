@@ -17,10 +17,12 @@
 
     <!-- Apps pinned to the dock row at the bottom, in this order. Missing apps are skipped. -->
     <string-array name="dock_apps">
+        <item>com.plexapp.android</item>
         <item>com.netflix.ninja</item>
-        <item>com.amazon.amazonvideo.livingroom</item>
+        <item>com.apple.atve.androidtv.appletv</item>
         <item>com.google.android.youtube.tv</item>
-        <item>in.startv.hotstar</item>
+        <item>com.disney.disneyplus</item>
+        <item>com.amazon.amazonvideo.livingroom</item>
     </string-array>
     <!-- With fewer dock_apps than columns (or a dock app that is not installed), the free dock slots take
          the first grid apps, so the dock never shows a gap. false leaves them empty (#162); a theme can
@@ -34,7 +36,7 @@
     </string-array>
 
     <!-- The TV's Live TV / tuner app, offered at the end of the Inputs menu. Leave empty to omit. -->
-    <string name="live_tv_package" translatable="false">com.mediatek.wwtv.tvcenter</string>
+    <string name="live_tv_package" translatable="false"></string>
 
     <!-- Open the Live TV app above the first time Home comes up after the TV is switched on, for sets that are
          mostly used for broadcast TV. Once per boot: Home after that stays Home. Can also be set with
@@ -73,6 +75,10 @@
     <!-- A tile's artwork instead of the app's banner: "package=drawable", a banner_* drawable bundled with the
          launcher (res/drawable). banner_tv is a magenta field with the Live TV glyph. -->
     <string-array name="app_banners">
+    </string-array>
+    <!-- An app's colour instead of the one sampled from its banner: "package=#RRGGBB". It is the colour of the
+         glow behind the dock and of wallpaper_tint while that app is focused. A theme can set "app_colors". -->
+    <string-array name="app_colors" translatable="false">
     </string-array>
 
     <!-- TVs with no TvInputManager have no HDMI list to read, but their own source-selection panel
@@ -264,6 +270,20 @@
     <!-- The Wi-Fi/Ethernet pill in the top bar. false hides it (on Android 14 with Location off it can
          only say "Wi-Fi", not the network name). Can also be set with "show_network_pill" in a theme. -->
     <bool name="show_network_pill">true</bool>
+    <!-- The Settings button in the top bar. false hides it, for a remote whose own button opens Settings
+         (settings_key_keycodes); its hold menu (Edit dock, Reorder apps, module cards) goes with it. With no
+         button left in the top bar, Up from the dock stays put. Can also be set with "show_settings_button". -->
+    <bool name="show_settings_button">true</bool>
+
+    <!-- Another app's panel as the first row of the quick settings panel (settings_key_panel), as
+         "package/.Activity", with that activity's own label and icon; empty for none. The package must also be in
+         the manifest's <queries>. Can also be set with "quick_panel_app" in a theme. -->
+    <string name="quick_panel_app" translatable="false"></string>
+    <!-- A content URI whose "text" column (an outside temperature such as "61°") goes after the date, read when
+         Home comes up and once a minute while it is on screen, and again when the provider says it changed. The
+         launcher only reads a local provider; the app behind it does any fetching. Empty for none. Can also be set
+         with "outside_temp_uri" in a theme. -->
+    <string name="outside_temp_uri" translatable="false"></string>
     <!-- Apps shown as round buttons with their own logo in the top bar, left of the network pill, in this order.
          They leave the grid. Missing apps are skipped. Can also be set with "top_bar_apps" in a theme. -->
     <string-array name="top_bar_apps" translatable="false">
@@ -303,7 +323,7 @@
 
     <!-- Tiles per row in the grid; the dock always has this many slots. Tiles are 180dp wide at 4 columns and
          shrink to fit from 5 up (about 144dp at 5, 117dp at 6 on a 1080p TV). -->
-    <integer name="columns">4</integer>
+    <integer name="columns">6</integer>
 
     <!-- Basic motion is on; advanced effects are opt-in in the launcher's own Settings screen. -->
     <bool name="animations">true</bool>

@@ -214,6 +214,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final boolean tileMenu;
     /** Tile names and bundled banners that replace the app's own (config.xml, app_labels and app_banners). */
     private final Map<String, String> appLabels, appBanners;
+    private final Map<String, Integer> appColors;
     /** Every app tile is its icon on a card tinted from that icon, never its banner (config.xml, uniform_tiles). */
     private final boolean uniformTiles;
     private final List<Entry> items = new ArrayList<>();
@@ -242,6 +243,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.tileMenu = cfg.tileMenu;
         this.appLabels = cfg.appLabels;
         this.appBanners = cfg.appBanners;
+        this.appColors = cfg.appColors;
         this.uniformTiles = cfg.uniformTiles;
         // Tiles keep their identity across reload(), so a focused tile stays on its app instead of
         // its view being rebound to whatever app now sits in that slot.
@@ -650,6 +652,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if (position < 0 || position >= items.size()) return 0xFF444444;
         Entry e = items.get(position);
         if (e.ambient == 0) {
+            Integer fixed = appColors.get(e.pkg);
+            if (fixed != null) return e.ambient = fixed;
             e.ambient = uniformTiles && e.banner == null ? dominantColor(e.icon) : vividColor(e.banner != null ? e.banner : e.icon);
         }
         return e.ambient;

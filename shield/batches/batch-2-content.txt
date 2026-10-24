@@ -1,0 +1,5 @@
+# Batch 2: partner auto-installs, NVIDIA Games row, GameStream, mobile-data meter
+android.autoinstalls.config.nvidia
+com.nvidia.tegrazone3
+com.nvidia.nvgamecast
+com.google.android.apps.nbu.smartconnect.tv

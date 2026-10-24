@@ -28,6 +28,11 @@ the rules. Keys from before this rule are on its wanted list; a screenshot for o
 | `wallpaper_rotation_minutes` | <img src="../themes/scenes/screenshot.jpg" width="320" alt="wallpaper_rotation_minutes on a TV"> |
 | `festival` | <img src="../themes/dussehra/screenshot.jpg" width="320" alt="festival on a TV"> |
 | `settings_key_panel` | <img src="quick-settings-panel.jpg" width="320" alt="settings_key_panel on a TV"> |
+| `wallpaper_tint` | <img src="super-shield/tint-netflix.jpg" width="320" alt="wallpaper_tint on a TV"> |
+| `app_colors` | <img src="super-shield/tint-apple-tv.jpg" width="320" alt="app_colors on a TV"> |
+| `show_settings_button` | <img src="super-shield/home-plex.jpg" width="320" alt="show_settings_button false on a TV"> |
+| `quick_panel_app` | <img src="super-shield/quick-settings-panel.jpg" width="320" alt="quick_panel_app on a TV"> |
+| `outside_temp_uri` | <img src="super-shield/home-plex.jpg" width="320" alt="outside_temp_uri on a TV"> |
 | `home_idle_clock_minutes` | <img src="clock-screensaver.png" width="320" alt="home_idle_clock_minutes on a TV"> |
 | `gamepad_passthrough` | <img src="switches/gamepad_passthrough.jpg" width="320" alt="gamepad_passthrough on a TV"> |
 | `consume_volume_keys` | <img src="switches/consume_volume_keys.jpg" width="320" alt="consume_volume_keys on a TV"> |

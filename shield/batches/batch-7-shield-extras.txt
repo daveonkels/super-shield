@@ -1,0 +1,5 @@
+# Batch 7: Shield extras the owner does not use
+com.plexapp.mediaserver.smb
+com.nvidia.shield.smbserver
+com.nvidia.osc
+com.nvidia.shieldtech.hooks

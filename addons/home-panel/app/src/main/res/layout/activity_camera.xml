@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF000000">
+
+    <ImageView
+        android:id="@+id/frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitCenter"
+        android:contentDescription="@null" />
+
+    <!-- Camera name and position, bottom left; fades a few seconds after each change. -->
+    <LinearLayout
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="48dp"
+        android:orientation="vertical"
+        android:background="@drawable/glass_panel"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFFFF"
+            android:textSize="20sp"
+            android:fontFamily="@string/font_medium" />
+
+        <TextView
+            android:id="@+id/hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#99FFFFFF"
+            android:textSize="12sp"
+            android:fontFamily="@string/font_body" />
+    </LinearLayout>
+</FrameLayout>

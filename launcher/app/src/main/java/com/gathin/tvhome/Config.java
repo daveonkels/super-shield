@@ -71,6 +71,8 @@ final class Config {
     final Map<String, String> appLabels;
     /** Package to a bundled banner_* drawable its tile shows instead of the app's art (config.xml, app_banners). */
     final Map<String, String> appBanners;
+    /** Package to the colour used for it instead of the one sampled from its banner (config.xml, app_colors). */
+    final Map<String, Integer> appColors;
     final String sourcePanelService;
     final String sourcePanelAction;
     /** One int extra for the source panel, "name=value" (config.xml source_panel_extra); empty for none. */
@@ -111,6 +113,12 @@ final class Config {
     final boolean reorderButton;
     /** Show the Wi-Fi/Ethernet pill in the top bar (config.xml, show_network_pill). */
     final boolean showNetworkPill;
+    /** The Settings button in the top bar (config.xml, show_settings_button); false hides it. */
+    final boolean showSettingsButton;
+    /** Another app's panel as the first row of the quick settings panel, "package/.Activity" (config.xml, quick_panel_app). */
+    final String quickPanelApp;
+    /** A content URI whose "text" column goes after the date, e.g. an outside temperature (config.xml, outside_temp_uri). */
+    final String outsideTempUri;
     /** Show the Inputs pill when the TV has inputs to list (config.xml, show_inputs_pill). */
     final boolean showInputsPill;
     /** Wi-Fi and Settings pills as round icon buttons, Inputs keeps its label (config.xml icon_only_buttons). */
@@ -166,6 +174,8 @@ final class Config {
     final List<File> wallpapers;
     final int wallpaperRotationMinutes;
     final int wallpaperDim;
+    /** How far the wallpaper shifts toward the focused app's colour, 0 to 100 % (config.json wallpaper_tint); 0 is off. */
+    final int wallpaperTint;
     /** The dock band's opacity in percent (config.json dock_opacity, 30-100): below 100 the wallpaper shows through. */
     final int dockOpacity;
     /**
@@ -207,11 +217,11 @@ final class Config {
     final Map<String, Set<String>> wallpaperMoods;
     /** Shape of the glow behind the focused app (config.xml, glow_style): {@link #GLOW_RADIAL} or {@link #GLOW_HORIZON}. */
     final String glowStyle;
-    /** The focus highlight's look (config.xml, glass_style): {@link #GLASS_DEFAULT}, {@link #GLASS_RIM} or {@link #GLASS_HALO}. */
+    /** The focus highlight's look (config.xml, glass_style): {@link #GLASS_DEFAULT}, {@link #GLASS_RIM}, {@link #GLASS_HALO} or {@link #GLASS_OUTLINE}. */
     final String glassStyle;
 
     static final String GLOW_RADIAL = "radial", GLOW_HORIZON = "horizon";
-    static final String GLASS_DEFAULT = "glass", GLASS_RIM = "rim", GLASS_HALO = "halo";
+    static final String GLASS_DEFAULT = "glass", GLASS_RIM = "rim", GLASS_HALO = "halo", GLASS_OUTLINE = "outline";
     /** Show each rotating wallpaper's name from wallpapers/captions.txt (config.xml / theme wallpaper_captions). */
     final boolean wallpaperCaptions;
     /** Answer VIEW_INPUTS with the Inputs menu (handle_view_inputs); see InputsRequestActivity. */
@@ -239,13 +249,13 @@ final class Config {
 
     private Config(List<String> dockApps, boolean fillDock, List<String> hiddenApps, List<String> libraryApps, String liveTvPackage,
                    String liveTvAction, String liveTvInputId, Map<String, String> launchActions, Map<String, String> appLabels,
-                   Map<String, String> appBanners, String sourcePanelService, String sourcePanelAction,
+                   Map<String, String> appBanners, Map<String, Integer> appColors, String sourcePanelService, String sourcePanelAction,
                    String sourcePanelExtra, boolean coocaaSources, String inputAction,
                    String inputUriScheme, int columns, int rowsBelowDock, boolean animations, boolean advancedEffects,
-                   boolean shamsiDate, String greetingName, boolean moduleCards, boolean reducedMotion, boolean bootToLiveTv, boolean openOnStartChoice, boolean dockTitle, boolean dockRow, boolean topMenu, boolean launcherSettingsButton, boolean reorderButton, boolean showNetworkPill, boolean showInputsPill, boolean iconOnlyButtons, boolean iconOnlyInputs, boolean libraryButton, int wifiLabelWidth, boolean alwaysShowNames, boolean wallpaperTrueColor, boolean focusOvershoot, String vpnApp,
+                   boolean shamsiDate, String greetingName, boolean moduleCards, boolean reducedMotion, boolean bootToLiveTv, boolean openOnStartChoice, boolean dockTitle, boolean dockRow, boolean topMenu, boolean launcherSettingsButton, boolean reorderButton, boolean showNetworkPill, boolean showSettingsButton, String quickPanelApp, String outsideTempUri, boolean showInputsPill, boolean iconOnlyButtons, boolean iconOnlyInputs, boolean libraryButton, int wifiLabelWidth, boolean alwaysShowNames, boolean wallpaperTrueColor, boolean focusOvershoot, String vpnApp,
                    boolean showHomeSettingsShortcut, boolean showStats, boolean appLibrary, boolean appLibrarySelection, boolean uniformTiles, int backgroundColor, int skyIntensity,
                    int[] settingsKeycodes, boolean settingsKeyPanel, boolean restoreKeyServices, boolean wallpaperEnabled, File wallpaper, List<File> wallpapers,
-                   int wallpaperRotationMinutes, int wallpaperDim, int dockOpacity, String wallpaperOrder, boolean overlayApplied,
+                   int wallpaperRotationMinutes, int wallpaperDim, int wallpaperTint, int dockOpacity, String wallpaperOrder, boolean overlayApplied,
                    Festival festival, int[] inputKeycodes, List<String> appKeys, String stockHomeRedirect,
                    List<RaceWeekend.Race> raceCalendar, boolean cinematicHome, boolean ambientGlow, boolean appGlow, boolean fadeRows, int homeIdleClockMinutes,
                    boolean keyFilter, boolean dockGlass, String glowStyle, boolean wallpaperCaptions,
@@ -267,6 +277,7 @@ final class Config {
         this.launchActions = Collections.unmodifiableMap(launchActions);
         this.appLabels = Collections.unmodifiableMap(appLabels);
         this.appBanners = Collections.unmodifiableMap(appBanners);
+        this.appColors = Collections.unmodifiableMap(appColors);
         this.sourcePanelService = sourcePanelService;
         this.sourcePanelAction = sourcePanelAction;
         this.sourcePanelExtra = sourcePanelExtra;
@@ -291,6 +302,9 @@ final class Config {
         this.launcherSettingsButton = launcherSettingsButton;
         this.reorderButton = reorderButton;
         this.showNetworkPill = showNetworkPill;
+        this.showSettingsButton = showSettingsButton;
+        this.quickPanelApp = quickPanelApp;
+        this.outsideTempUri = outsideTempUri;
         this.showInputsPill = showInputsPill;
         this.iconOnlyButtons = iconOnlyButtons;
         this.iconOnlyInputs = iconOnlyInputs;
@@ -315,6 +329,7 @@ final class Config {
         this.wallpapers = Collections.unmodifiableList(wallpapers);
         this.wallpaperRotationMinutes = wallpaperRotationMinutes;
         this.wallpaperDim = wallpaperDim;
+        this.wallpaperTint = wallpaperTint;
         this.dockOpacity = dockOpacity;
         this.wallpaperOrder = wallpaperOrder;
         this.overlayApplied = overlayApplied;
@@ -359,6 +374,7 @@ final class Config {
         if (value == null) return GLASS_DEFAULT;
         String v = value.trim();
         if (GLASS_RIM.equalsIgnoreCase(v)) return GLASS_RIM;
+        if (GLASS_OUTLINE.equalsIgnoreCase(v)) return GLASS_OUTLINE;
         return GLASS_HALO.equalsIgnoreCase(v) ? GLASS_HALO : GLASS_DEFAULT;
     }
 
@@ -379,6 +395,7 @@ final class Config {
         List<String> launchActions = new ArrayList<>(Arrays.asList(res.getStringArray(R.array.launch_actions)));
         List<String> appLabels = new ArrayList<>(Arrays.asList(res.getStringArray(R.array.app_labels)));
         List<String> appBanners = new ArrayList<>(Arrays.asList(res.getStringArray(R.array.app_banners)));
+        List<String> appColors = new ArrayList<>(Arrays.asList(res.getStringArray(R.array.app_colors)));
         String panelService = res.getString(R.string.source_panel_service).trim();
         String panelAction = res.getString(R.string.source_panel_action).trim();
         String panelExtra = res.getString(R.string.source_panel_extra).trim();
@@ -403,6 +420,9 @@ final class Config {
         boolean launcherSettingsButton = res.getBoolean(R.bool.launcher_settings_button);
         boolean reorderButton = res.getBoolean(R.bool.reorder_button);
         boolean showNetworkPill = res.getBoolean(R.bool.show_network_pill);
+        boolean showSettingsButton = res.getBoolean(R.bool.show_settings_button);
+        String quickPanelApp = res.getString(R.string.quick_panel_app).trim();
+        String outsideTempUri = res.getString(R.string.outside_temp_uri).trim();
         boolean showInputsPill = res.getBoolean(R.bool.show_inputs_pill);
         boolean iconOnlyButtons = res.getBoolean(R.bool.icon_only_buttons);
         boolean iconOnlyInputs = res.getBoolean(R.bool.icon_only_inputs);
@@ -473,6 +493,7 @@ final class Config {
             launchActions = stringList(json, "launch_actions", launchActions);
             appLabels = stringList(json, "app_labels", appLabels);
             appBanners = stringList(json, "app_banners", appBanners);
+            appColors = stringList(json, "app_colors", appColors);
             panelService = string(json, "source_panel_service", panelService);
             panelAction = string(json, "source_panel_action", panelAction);
             panelExtra = string(json, "source_panel_extra", panelExtra).trim();
@@ -497,6 +518,9 @@ final class Config {
             launcherSettingsButton = bool(json, "launcher_settings_button", launcherSettingsButton);
             reorderButton = bool(json, "reorder_button", reorderButton);
             showNetworkPill = bool(json, "show_network_pill", showNetworkPill);
+            showSettingsButton = bool(json, "show_settings_button", showSettingsButton);
+            quickPanelApp = string(json, "quick_panel_app", quickPanelApp).trim();
+            outsideTempUri = string(json, "outside_temp_uri", outsideTempUri).trim();
             showInputsPill = bool(json, "show_inputs_pill", showInputsPill);
             iconOnlyButtons = bool(json, "icon_only_buttons", iconOnlyButtons);
             iconOnlyInputs = bool(json, "icon_only_inputs", iconOnlyInputs);
@@ -571,6 +595,7 @@ final class Config {
         if (!wallpaperEnabled) wallpaper = null;
         int rotationMinutes = json == null ? 0 : integer(json, "wallpaper_rotation_minutes", 0, 0, 1440);
         int wallpaperDim = json == null ? 0 : integer(json, "wallpaper_dim", 0, 0, 90);
+        int wallpaperTint = json == null ? 0 : integer(json, "wallpaper_tint", 0, 0, 100);
         int dockOpacity = json == null ? 100 : integer(json, "dock_opacity", 100, 30, 100);
         dockOpacity = chosenDockOpacity(choices.getInt(DOCK_OPACITY_KEY, -1), dockOpacity);
         String wallpaperOrder = json == null ? WallpaperRotation.ORDER_SHUFFLE
@@ -598,12 +623,12 @@ final class Config {
                 string(json, "festival_until", ""), string(json, "greeting", ""), string(json, "accent_color", ""));
 
         return new Config(dock, fillDock, hidden, libraryApps, liveTv, liveTvAction, liveTvInputId, packageMap(launchActions), packageMap(appLabels),
-                packageMap(appBanners), panelService,
+                packageMap(appBanners), colorMap(packageMap(appColors)), panelService,
                 panelAction, panelExtra, coocaaSources, inputAction, inputUriScheme,
                 Math.max(1, columns), Math.max(0, rowsBelow), animations, advancedEffects,
-                shamsi, greetingName, moduleCards, reducedMotion, bootToLiveTv, openOnStartChoice, dockTitle, dockRow, topMenu, launcherSettingsButton, reorderButton, showNetworkPill, showInputsPill, iconOnlyButtons, iconOnlyInputs, libraryButton, wifiLabelWidth, alwaysShowNames, wallpaperTrueColor, focusOvershoot, vpn, homeSettings, showStats, library, librarySelection, uniformTiles, background,
+                shamsi, greetingName, moduleCards, reducedMotion, bootToLiveTv, openOnStartChoice, dockTitle, dockRow, topMenu, launcherSettingsButton, reorderButton, showNetworkPill, showSettingsButton, quickPanelApp, outsideTempUri, showInputsPill, iconOnlyButtons, iconOnlyInputs, libraryButton, wifiLabelWidth, alwaysShowNames, wallpaperTrueColor, focusOvershoot, vpn, homeSettings, showStats, library, librarySelection, uniformTiles, background,
                 Math.max(0, Math.min(100, skyIntensity)), settingsKeycodes, settingsKeyPanel, restoreKeyServices, wallpaperEnabled, wallpaper,
-                wallpapers, rotationMinutes, wallpaperDim, dockOpacity, wallpaperOrder, applied,
+                wallpapers, rotationMinutes, wallpaperDim, wallpaperTint, dockOpacity, wallpaperOrder, applied,
                 festival, inputKeycodes, appKeys, stockHomeRedirect, json == null ? Collections.emptyList() : raceCalendar(json), cinematic, ambientGlow, appGlow, fadeRows,
                 Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu, dockEvenPadding, cinematicDots, cinematicWhiteFocus, wifiStatusColor, cinematicScrim, cinematicArt, wallpaperMoods, gamepadPassthrough, consumeVolumeKeys, wifiStatusWarnings, topBarApps, showGreeting, headerWhite, clockWallpaper, Math.max(0, Math.min(90, clockWallpaperDim)), clockGlow, glassStyle, singleRow && dockRow, dockBandAll, lunar, lunarOffset);
     }
@@ -796,6 +821,19 @@ final class Config {
             if (eq <= 0) continue;
             String pkg = entry.substring(0, eq).trim(), value = entry.substring(eq + 1).trim();
             if (!pkg.isEmpty() && !value.isEmpty()) out.put(pkg, value);
+        }
+        return out;
+    }
+
+    /** app_colors values as opaque colours; a value Color cannot parse is left out, so that app keeps its sampled colour. */
+    private static Map<String, Integer> colorMap(Map<String, String> entries) {
+        Map<String, Integer> out = new HashMap<>();
+        for (Map.Entry<String, String> e : entries.entrySet()) {
+            try {
+                out.put(e.getKey(), Color.parseColor(e.getValue()) | 0xFF000000);
+            } catch (IllegalArgumentException ignored) {
+                // not a colour: keep the banner's
+            }
         }
         return out;
     }

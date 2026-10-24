@@ -1,0 +1,28 @@
+{
+  "background_color": "#070A14",
+  "wallpaper": true,
+  "wallpaper_tint": 85,
+  "app_colors": [
+    "com.plexapp.android=#000000",
+    "com.apple.atve.androidtv.appletv=#9A9AA0",
+    "com.discovery.discoveryplus.mobile=#071658",
+    "org.jellyfin.androidtv=#A25DC2",
+    "com.amazon.amazonvideo.livingroom=#0578FF"
+  ],
+  "show_network_pill": false,
+  "icon_only_buttons": true,
+  "settings_key_keycodes": [
+    82
+  ],
+  "settings_key_panel": true,
+  "show_settings_button": false,
+  "quick_panel_app": "com.onk.homepanel/.PanelActivity",
+  "outside_temp_uri": "content://com.onk.homepanel.weather/now",
+  "app_keys": [
+    "hold:82:com.onk.homepanel"
+  ],
+  "hidden_apps": [
+    "com.onk.homepanel"
+  ],
+  "glass_style": "outline"
+}

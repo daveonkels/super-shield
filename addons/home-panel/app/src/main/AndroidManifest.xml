@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-feature android:name="android.software.leanback" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+
+    <!-- Your Home Assistant server, and nothing else. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="false"
+        android:banner="@drawable/banner"
+        android:icon="@drawable/ic_home"
+        android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network"
+        android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+
+        <!-- The glass panel: opened from the launcher's quick settings panel (quick_panel_app) or by holding the
+             remote's Settings button (a hold: app_keys entry). Translucent and in a task of its own, like the
+             launcher's quick settings, so whatever is playing keeps running behind it. -->
+        <activity
+            android:name=".PanelActivity"
+            android:exported="true"
+            android:icon="@drawable/ic_home"
+            android:label="@string/panel_name"
+            android:taskAffinity=""
+            android:launchMode="singleTop"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".CameraActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
+
+        <!-- install.sh writes the server, token and entities here with `content write`, so the token never sits on
+             a command line. Write-only, one file name, and only the ADB shell may call it. -->
+        <provider
+            android:name=".ConfigProvider"
+            android:authorities="com.onk.homepanel.config"
+            android:exported="true"
+            android:permission="android.permission.WRITE_SECURE_SETTINGS" />
+
+        <!-- The outside temperature for the launcher's date line: one read-only row, nothing else. -->
+        <provider
+            android:name=".WeatherProvider"
+            android:authorities="com.onk.homepanel.weather"
+            android:exported="true" />
+    </application>
+</manifest>

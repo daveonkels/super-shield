@@ -154,6 +154,13 @@ public class HomeKeyService extends AccessibilityService {
         // The stock launcher handled the remote's Settings button; with it disabled the button does nothing.
         if (isSettingsKey(event)) {
             if (event.getAction() == KeyEvent.ACTION_UP && !event.isCanceled()) {
+                // A hold: entry for the same key (app_keys) wins once the button is held; a tap still opens Settings.
+                String held = RemoteKeys.target(null, holdAppKeys.get(event.getKeyCode()),
+                        event.getEventTime() - event.getDownTime());
+                if (held != null) {
+                    RemoteKeys.launch(this, held);
+                    return true;
+                }
                 Intent open = settingsPanel ? new Intent(this, QuickSettingsActivity.class)
                         : SystemSettings.intent(this, Settings.ACTION_SETTINGS);
                 try {

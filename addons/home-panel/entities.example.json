@@ -1,0 +1,8 @@
+{
+  "temperature": "sensor.my_tempest_temperature",
+  "scenes": ["scene.movie_night", "scene.all_off"],
+  "cameras": [
+    "camera.front_door_high_resolution_channel",
+    "camera.driveway_high_resolution_channel"
+  ]
+}

@@ -1,0 +1,5 @@
+# Batch 1: NVIDIA and Google telemetry/feedback
+com.nvidia.stats
+com.nvidia.feedback
+com.nvidia.diagtools
+com.google.android.feedback

@@ -36,6 +36,8 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.database.ContentObserver;
+import android.database.Cursor;
 import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -67,6 +69,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.PopupWindow;
+import android.widget.TextClock;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -287,6 +290,17 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private RecyclerView.OnScrollListener pendingFocusScroll;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
+    /** outside_temp_uri: a content URI whose "text" column ("61°") goes after the date; null when off. */
+    private Uri outsideTempUri;
+    private String dateFormat;
+    private final java.util.concurrent.ExecutorService tempReader =
+            java.util.concurrent.Executors.newSingleThreadExecutor();
+    private final ContentObserver tempChanged = new ContentObserver(handler) {
+        @Override
+        public void onChange(boolean selfChange) {
+            updateOutsideTemp();
+        }
+    };
     /** Refreshes the network pill when the connection changes: at boot Wi-Fi often connects after Home is shown. */
     private final ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
         @Override
@@ -365,6 +379,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (festive) updateWifiLabel();
             sky.update();
             wallpaperPlayer.update();
+            updateOutsideTemp();
             handler.postDelayed(this, MINUTE_MS);
         }
     };
@@ -479,6 +494,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         lunarOffset = Lunar.offsetFor(cfg.lunarUtcOffset, Locale.getDefault());
         if (lunar) lunarDate.setVisibility(View.VISIBLE);
         greetingName = cfg.greetingName;
+        if (!cfg.outsideTempUri.isEmpty()) {
+            outsideTempUri = Uri.parse(cfg.outsideTempUri);
+            dateFormat = getString(R.string.date_format_home);
+        }
         if (shamsi) {
             shamsiDate.setVisibility(View.VISIBLE);
             TextView date = findViewById(R.id.date);
@@ -700,6 +719,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         btnReorder.setOnClickListener(v -> toggleReorder());
         btnReorder.setVisibility(cfg.reorderButton ? View.VISIBLE : View.GONE);
         if (!cfg.showNetworkPill) btnWifi.setVisibility(View.GONE);
+        if (!cfg.showSettingsButton) btnSettings.setVisibility(View.GONE);
         showInputsPill = cfg.showInputsPill;
         showInputsMenuRow = cfg.showInputsPill;
         btnLibraryTop = findViewById(R.id.btnLibraryTop);
@@ -954,6 +974,14 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         sky.update();
         wallpaperPlayer.start();
         handler.postDelayed(minuteTick, MINUTE_MS);
+        if (outsideTempUri != null) {
+            updateOutsideTemp();
+            try {
+                getContentResolver().registerContentObserver(outsideTempUri, false, tempChanged);
+            } catch (SecurityException ignored) {
+                // provider not installed or not visible: the date stays as it is
+            }
+        }
         if (festive && diya != null) {
             diya.start();
             LocalDate today = LocalDate.now();
@@ -1127,6 +1155,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         ambient.animate().cancel();
         heroArt.animate().cancel();
         handler.removeCallbacks(minuteTick);
+        if (outsideTempUri != null) getContentResolver().unregisterContentObserver(tempChanged);
         stopStats();
         if (diya != null) diya.stop();
         cancelPendingFocusScroll();
@@ -1683,6 +1712,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private void showHero(int position, float dockTopInRoot) {
         String label = adapter.labelAt(position);
         int color = adapter.ambientColorAt(position);
+        wallpaperPlayer.tint(color);
         float y = dockTopInRoot - 14 * density - 26 * density - hero.getHeight();
         boolean changed = !label.contentEquals(heroName.getText());
         if (cinematic && heroArtAlpha > 0f) showHeroArt(position);
@@ -1952,6 +1982,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      */
     private void showGlowOnly(int position) {
         int color = adapter.ambientColorAt(position);
+        wallpaperPlayer.tint(color);
         stopAmbientAnimation();
         hero.animate().cancel();
         ambient.animate().cancel();
@@ -2224,7 +2255,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                     rtlAppGrid, keyCode == KeyEvent.KEYCODE_DPAD_LEFT);
         }
         if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
-            if (position < COLUMNS) return false;          // dock row: let focus move to the top bar
+            if (position < COLUMNS) return !topBarShown();  // dock row: let focus move to the top bar, if it has a button
             target = position - COLUMNS;
         } else {
             int lastRowStart = ((count - 1) / COLUMNS) * COLUMNS;
@@ -2247,7 +2278,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         hideHero();
     }
 
-    /** The first top-bar button after Inputs that is shown, in bar order (top_bar_apps, the network pill, ...); Settings is always there. */
+    /** The first top-bar button after Inputs that is shown, in bar order (top_bar_apps, the network pill, ...), else Settings. */
     private View firstTopButton() {
         ViewGroup bar = findViewById(R.id.topButtons);
         for (int i = 0; i < bar.getChildCount(); i++) {
@@ -2255,6 +2286,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (button != btnInputs && button.getVisibility() == View.VISIBLE) return button;
         }
         return findViewById(R.id.btnSettings);
+    }
+
+    /** Whether the top bar has any button to take focus; show_settings_button false can leave it empty. */
+    private boolean topBarShown() {
+        ViewGroup bar = findViewById(R.id.topButtons);
+        for (int i = 0; i < bar.getChildCount(); i++) {
+            if (bar.getChildAt(i).getVisibility() == View.VISIBLE) return true;
+        }
+        return false;
     }
 
     /** top_bar_apps buttons, in bar order. */
@@ -2403,6 +2443,33 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         } else {
             handler.postDelayed(clockCheck, 1_000L);
         }
+    }
+
+    /**
+     * outside_temp_uri: reads the temperature from the provider (an add-on such as Home Controls) off the main thread
+     * and puts it after the date as a quoted literal in the date clock's format, so the clock keeps ticking it. The
+     * launcher only reads a local provider; whatever fetches the value is the add-on's business.
+     */
+    private void updateOutsideTemp() {
+        Uri uri = outsideTempUri;
+        if (uri == null) return;
+        tempReader.execute(() -> {
+            String text = "";
+            try (Cursor c = getContentResolver().query(uri, new String[]{"text"}, null, null, null)) {
+                if (c != null && c.moveToFirst()) text = c.getString(0);
+            } catch (RuntimeException ignored) {
+                // provider gone or not visible: show the date alone
+            }
+            String value = text == null ? "" : text.replace("'", "").trim();
+            if (value.length() > 12) value = "";
+            String shown = value;
+            handler.post(() -> {
+                TextClock date = findViewById(R.id.date);
+                String format = shown.isEmpty() ? dateFormat : dateFormat + "  '\u00B7  " + shown + "'";
+                date.setFormat12Hour(format);
+                date.setFormat24Hour(format);
+            });
+        });
     }
 
     private void updateGreeting() {

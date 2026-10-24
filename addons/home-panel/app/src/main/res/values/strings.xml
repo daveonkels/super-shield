@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Home Controls</string>
+    <string name="panel_name">Smart Home</string>
+    <string name="outside">Outside</string>
+    <string name="scenes">Scenes</string>
+    <string name="cameras">Cameras</string>
+    <string name="done">Done</string>
+    <string name="failed">Failed</string>
+    <string name="offline">Offline</string>
+    <string name="not_set_up">Not set up</string>
+    <string name="not_set_up_hint">push config with install.sh</string>
+    <string name="camera_error">Camera unavailable</string>
+</resources>

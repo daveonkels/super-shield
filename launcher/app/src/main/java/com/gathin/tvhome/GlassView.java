@@ -29,6 +29,8 @@ public class GlassView extends View {
     /** glass_style rim or halo: no sheen and no fill, only the crisp rim (and, for halo, a lighter outer glow). */
     private boolean flat;
     private boolean halo;
+    /** glass_style outline: a solid white line just outside the tile, with a thin gap to it. */
+    private boolean outline;
 
     public GlassView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -46,6 +48,7 @@ public class GlassView extends View {
 
     /** Tints the rim and the outer glow; 0 restores the plain white glass. */
     void setAccent(int argb) {
+        if (outline) return;   // always white
         if (argb == 0) {
             glowRgb = 0xFFFFFF;
             glowAlpha = 0x30;
@@ -63,9 +66,11 @@ public class GlassView extends View {
 
     /** One of Config's GLASS_* styles. */
     void setStyle(String style) {
-        flat = Config.GLASS_RIM.equals(style) || Config.GLASS_HALO.equals(style);
+        outline = Config.GLASS_OUTLINE.equals(style);
+        flat = outline || Config.GLASS_RIM.equals(style) || Config.GLASS_HALO.equals(style);
         halo = Config.GLASS_HALO.equals(style);
-        rim.setStrokeWidth((flat ? 2f : 1.5f) * density);
+        rim.setStrokeWidth((outline ? 3f : flat ? 2f : 1.5f) * density);
+        if (outline) rim.setColor(0xFFFFFFFF);
         invalidate();
     }
 
@@ -100,6 +105,13 @@ public class GlassView extends View {
                 glow.setColor(Math.round(alpha * t) << 24 | glowRgb);
                 canvas.drawRoundRect(rect.left - o, rect.top - o, rect.right + o, rect.bottom + o, radius + o, radius + o, glow);
             }
+        }
+        if (outline) {
+            // A small gap outside the tile's edge: the dark band shows between the line and a white tile.
+            float out = 2.5f * density;
+            canvas.drawRoundRect(rect.left - out, rect.top - out, rect.right + out, rect.bottom + out,
+                    radius + out, radius + out, rim);
+            return;
         }
         if (flat) {
             canvas.drawRoundRect(rect, radius, radius, rim);
