@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Undo the SHIELD cleanup: re-enable every package in shield/debloat.txt, give Home back to the stock launcher,
-# and put the screensaver and Private DNS back. With a local backup/ (taken before the cleanup) the recorded
+# and put the screensaver, Private DNS and the 1080p interface back (--keep-launcher keeps the interface size). With a local backup/ (taken before the cleanup) the recorded
 # values are used; without one, the Android TV defaults (Backdrop, opportunistic DNS).
 #
 # Usage:  TV_HOST=<shield ip> ./restore.sh                     # network debugging on, port 5555
@@ -40,6 +40,8 @@ SPEC=$(recorded global private_dns_specifier)
 if [ -n "$SPEC" ]; then tv "settings put global private_dns_specifier $SPEC"; else tv "settings delete global private_dns_specifier" >/dev/null; fi
 SAVER=$(recorded secure screensaver_components)
 tv "settings put secure screensaver_components ${SAVER:-com.google.android.backdrop/.Backdrop}"
+# The SHIELD's own interface size, in case shield/ui-4k.sh switched it to 4K. Not `wm size reset`: see ui-4k.sh.
+[ -z "$KEEP_LAUNCHER" ] && tv "wm size 1920x1080; wm density 320" >/dev/null
 
 echo "--- still disabled on the TV:"
 tv "pm list packages -d" | tr -d '\r'
