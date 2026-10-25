@@ -26,3 +26,6 @@ launcher/replay_pid*.log
 addons/*/local.properties
 # the Home Assistant token file lives in backup/ (ignored above); keep any stray copy out too
 *secret*.json
+
+# Replacement banner art (banner_files): brand logos, kept local, never published.
+themes/*/banners/

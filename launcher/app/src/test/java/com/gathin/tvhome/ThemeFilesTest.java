@@ -45,8 +45,21 @@ public class ThemeFilesTest {
     }
 
     @Test public void onlyTheBareFolderIsTheCollection() {
-        assertTrue(ThemeFiles.isCollection(Collections.singletonList("wallpapers")));
-        assertFalse(ThemeFiles.isCollection(Arrays.asList("wallpapers", "dusk.jpg")));
-        assertFalse(ThemeFiles.isCollection(Collections.singletonList("config.json")));
+        assertEquals("wallpapers", ThemeFiles.collection(Collections.singletonList("wallpapers")));
+        assertEquals("banners", ThemeFiles.collection(Collections.singletonList("banners")));
+        assertNull(ThemeFiles.collection(Arrays.asList("wallpapers", "dusk.jpg")));
+        assertNull(ThemeFiles.collection(Collections.singletonList("config.json")));
+    }
+
+    @Test public void bannersAreNamedAfterAPackage() {
+        assertEquals("banners/com.plexapp.android.png", ThemeFiles.path(Arrays.asList("banners", "com.plexapp.android.png")));
+        assertEquals("banners/tv.twitch.android.app.webp", ThemeFiles.path(Arrays.asList("banners", "tv.twitch.android.app.webp")));
+        assertNull(ThemeFiles.path(Arrays.asList("banners", "plex.png")));
+        assertNull(ThemeFiles.path(Arrays.asList("banners", "com.example.app.PNG")));
+        assertNull(ThemeFiles.path(Arrays.asList("banners", "com.example.app.txt")));
+        assertNull(ThemeFiles.path(Arrays.asList("banners", "../com.example.app.png")));
+        assertNull(ThemeFiles.path(Arrays.asList("banners", ".com.example.png")));
+        assertNull(ThemeFiles.path(Arrays.asList("banners", "sub", "com.example.app.png")));
+        assertFalse(ThemeFiles.bannerImage("dusk.jpg"));
     }
 }

@@ -43,14 +43,18 @@ A reboot re-enabled nothing. Kept on purpose:
 | `glass_style: outline` | A solid white focus line with a thin gap around the tile, instead of the blurred glass |
 | `show_settings_button` | Hide the Settings button when the remote's own ≡ button opens Settings |
 | `quick_panel_app` | Another app's panel as the first row of the ≡ quick settings panel |
+| `banner_files` | Tile artwork from pictures the theme pushes (`banners/<package>.png`), for apps that ship only a 320x180 banner |
 | `outside_temp_uri` | A local provider's temperature after the date: "SATURDAY 24 OCTOBER · 81°" |
 | `hold:` on a settings key | Holding ≡ opens its `hold:` app (Home Controls); a tap still opens quick settings |
 
 The launcher still has no `INTERNET` permission: the temperature comes from the add-on over a local provider.
-The release APK is 512,317 bytes, under cleanyourtv's 512 KB gate.
+The release APK is 512,841 bytes, under cleanyourtv's 512 KB gate.
 
 **Theme** ([`themes/aurora-tint/`](../themes/aurora-tint/)): Aurora with `wallpaper_tint` 85, the colour
-fixes, the outline, an empty top bar (no network pill, no Settings button) and the Home Controls wiring.
+fixes, the outline, an empty top bar (no network pill, no Settings button), the Home Controls wiring and
+`banner_files`. The banner pictures are brand logos, so they are not in this repo: put your own 640x360
+`<package>.png` files in `themes/aurora-tint/banners/` (git-ignored) before `tools/theme.sh`. Without them the
+apps' own banners show.
 
 **Home Controls add-on** ([`addons/home-panel/`](../addons/home-panel/)): a glass panel with the outside
 temperature (a Tempest via Home Assistant), scenes and full-screen cameras (UniFi Protect through Home
@@ -82,9 +86,10 @@ macOS can block a coding assistant's own connections to the LAN (Local Network p
 5. **Home Controls:** see [`addons/home-panel/README.md`](../addons/home-panel/README.md) for the token file and
    [`entities.example.json`](../addons/home-panel/entities.example.json).
 6. **4K interface (optional):** [`shield/ui-4k.sh`](../shield/ui-4k.sh). The SHIELD outputs 4K but draws its
-   interface at 1080p and upscales it; this draws it at 3839x2160, density 640: the same layout, with sharp text,
-   icons and banners. It survives reboots and costs memory (the launcher went from about 92 MB to 186 MB).
-   `--undo` goes back to 1080p.
+   interface at 1080p and upscales it; this draws it at 3839x2160, density 640: the same layout, with crisper
+   text and icons. The gain is modest from a couch: the compositor stretches the 3839 pixels to 3840 with
+   filtering, and most apps ship a 320x180 banner, which a 4K tile stretches (`banner_files` fixes that). It
+   survives reboots and costs memory (the launcher went from about 92 MB to 186 MB). `--undo` goes back to 1080p.
 7. **Close ADB when done:** in Developer options, revoke USB debugging authorisations and switch Network debugging
    and USB debugging off. Reboot, then check with `tools/venv/bin/python -I tools/adb-closed.py <shield ip>`; it
    should say the port refused the connection.
@@ -108,6 +113,9 @@ screensaver, Private DNS and the 1080p interface back (`--keep-launcher` keeps t
   (`persist.vendor.sys.display.resolution`), so a reset leaves a 4K screen at density 320, everything half size.
   `shield/ui-4k.sh --undo` and `restore.sh` set 1920x1080 at 320 instead. The SHIELD refuses a forced width of
   3840, hence 3839 (found by [ATV Optimizer](https://github.com/bryanroscoe/shield_optimizer)).
+- **Banner sizes on this SHIELD:** Plex, Apple TV, YouTube and Prime Video ship 320x180, Netflix 480x270, Disney+
+  512x288; a dock tile at 4K is about 455x255. With 640x360 `banner_files` pictures for the first four, a
+  4K capture showed 10 to 43% fewer soft edge pixels on those tiles, and none on Netflix, which was left alone.
 - **Private data stays local.** `backup/`, `shots/`, `work/`, `tools/adbkey/` and any `*secret*.json` are
   git-ignored. Home Assistant tokens live in the add-on's private storage on the TV, never in the repo.
 

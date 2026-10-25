@@ -2,6 +2,7 @@
   "background_color": "#070A14",
   "wallpaper": true,
   "wallpaper_tint": 85,
+  "banner_files": true,
   "app_colors": [
     "com.plexapp.android=#000000",
     "com.apple.atve.androidtv.appletv=#9A9AA0",

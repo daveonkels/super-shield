@@ -18,6 +18,8 @@ import java.io.FileNotFoundException;
  *   content write --uri content://com.gathin.tvhome.theme/wallpapers/dusk.jpg < /data/local/tmp/dusk.jpg
  *   content delete --uri content://com.gathin.tvhome.theme/config.json
  *   content delete --uri content://com.gathin.tvhome.theme/wallpapers      (every image in the collection)
+ *   content write --uri content://com.gathin.tvhome.theme/banners/com.example.app.png < /data/local/tmp/b.png
+ *   content delete --uri content://com.gathin.tvhome.theme/banners         (every banner_files picture)
  */
 public class ThemeProvider extends ContentProvider {
 
@@ -44,8 +46,11 @@ public class ThemeProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         File dir = Config.dir(getContext());
-        if (dir != null && ThemeFiles.isCollection(uri.getPathSegments())) {
-            File[] images = new File(dir, ThemeFiles.WALLPAPERS).listFiles((d, name) -> ThemeFiles.collectionImage(name));
+        String collection = ThemeFiles.collection(uri.getPathSegments());
+        if (dir != null && collection != null) {
+            boolean banners = ThemeFiles.BANNERS.equals(collection);
+            File[] images = new File(dir, collection).listFiles((d, name) ->
+                    banners ? ThemeFiles.bannerImage(name) : ThemeFiles.collectionImage(name));
             int n = 0;
             if (images != null) for (File f : images) if (f.delete()) n++;
             return n;

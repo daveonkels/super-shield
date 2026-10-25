@@ -9,11 +9,13 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
@@ -34,6 +36,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -217,6 +220,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final Map<String, Integer> appColors;
     /** Every app tile is its icon on a card tinted from that icon, never its banner (config.xml, uniform_tiles). */
     private final boolean uniformTiles;
+    /** banner_files: the folder of pushed tile artwork, or null when the switch is off. */
+    private final File bannerDir;
     private final List<Entry> items = new ArrayList<>();
 
     AppAdapter(Context ctx, TileListener listener, int dockSize, Config cfg) {
@@ -243,6 +248,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.tileMenu = cfg.tileMenu;
         this.appLabels = cfg.appLabels;
         this.appBanners = cfg.appBanners;
+        File themeDir = cfg.bannerFiles ? Config.dir(ctx) : null;
+        this.bannerDir = themeDir == null ? null : new File(themeDir, ThemeFiles.BANNERS);
         this.appColors = cfg.appColors;
         this.uniformTiles = cfg.uniformTiles;
         // Tiles keep their identity across reload(), so a focused tile stays on its app instead of
@@ -296,7 +303,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             Drawable banner = null;
             // uniform_tiles draws the icon, so an app's banner is never loaded. A module card keeps its banner.
             if (!(uniformTiles && card == null)) {
-                banner = bundledBanner(appBanners.get(pkg));
+                banner = fileBanner(pkg);
+                if (banner == null) banner = bundledBanner(appBanners.get(pkg));
                 if (banner == null) banner = loadBanner(pm, ri);
             }
             // The icon is only drawn (and sampled for the glow) when there is no banner, so a tile with a
@@ -340,6 +348,30 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         items.clear();
         items.addAll(fresh);
         notifyDataSetChanged();
+    }
+
+    /**
+     * banner_files: banners/<package>.png (or .jpg, .webp) pushed with the theme, for apps whose own banner is too
+     * small for the screen (most ship 320x180). Halved while wider than 1280, so a large file costs no more memory
+     * than a tile can show; null when the switch is off, there is no file, or it does not decode.
+     */
+    private Drawable fileBanner(String pkg) {
+        if (bannerDir == null) return null;
+        for (String ext : ThemeFiles.BANNER_TYPES) {
+            File f = new File(bannerDir, pkg + "." + ext);
+            if (!f.isFile()) continue;
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(f.getPath(), options);
+            if (options.outWidth <= 0 || options.outHeight <= 0) return null;
+            int sample = 1;
+            while (options.outWidth / sample > 1280) sample *= 2;
+            options.inJustDecodeBounds = false;
+            options.inSampleSize = sample;
+            Bitmap bitmap = BitmapFactory.decodeFile(f.getPath(), options);
+            return bitmap == null ? null : new BitmapDrawable(ctx.getResources(), bitmap);
+        }
+        return null;
     }
 
     /** A banner_* drawable bundled with the launcher, or null for none or a name that is not one. */

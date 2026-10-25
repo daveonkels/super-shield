@@ -32,6 +32,7 @@ the rules. Keys from before this rule are on its wanted list; a screenshot for o
 | `app_colors` | <img src="super-shield/tint-apple-tv.jpg" width="320" alt="app_colors on a TV"> |
 | `show_settings_button` | <img src="super-shield/home-plex.jpg" width="320" alt="show_settings_button false on a TV"> |
 | `quick_panel_app` | <img src="super-shield/quick-settings-panel.jpg" width="320" alt="quick_panel_app on a TV"> |
+| `banner_files` | <img src="super-shield/banner-files.jpg" width="320" alt="banner_files on a TV, a 4K crop of the dock"> |
 | `outside_temp_uri` | <img src="super-shield/home-plex.jpg" width="320" alt="outside_temp_uri on a TV"> |
 | `home_idle_clock_minutes` | <img src="clock-screensaver.png" width="320" alt="home_idle_clock_minutes on a TV"> |
 | `gamepad_passthrough` | <img src="switches/gamepad_passthrough.jpg" width="320" alt="gamepad_passthrough on a TV"> |

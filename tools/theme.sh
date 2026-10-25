@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Push a theme (a folder with config.json, and optionally a wallpaper.jpg or a wallpapers/ collection) to the
+# Push a theme (a folder with config.json, and optionally a wallpaper.jpg, a wallpapers/ collection or banners/) to the
 # launcher on the TV and restart Home so it picks it up. The launcher reads the files from its external files
 # directory and overlays config.json on its built-in config.xml; see themes/README.md for the keys.
 #
@@ -65,9 +65,11 @@ del() { echo "rm -f $DIR/$1 2>/dev/null; content delete --uri $URI/$1 2>/dev/nul
 # itself, and an on-TV pick of one of its pictures is read back from it (WallpaperRotation.chosen), so a reset
 # that left the pictures behind still shows the theme it just removed. Both paths use this one string.
 CLEAR_WALLPAPERS="mkdir -p $DIR/wallpapers 2>/dev/null; rm -f $DIR/wallpapers/*.[jJ][pP][gG] $DIR/wallpapers/*.[jJ][pP][eE][gG] $DIR/wallpapers/*.[pP][nN][gG] $DIR/wallpapers/*.[wW][eE][bB][pP] 2>/dev/null; content delete --uri $URI/wallpapers 2>/dev/null"
+# banner_files pictures (banners/<package>.png): emptied the same way, so a theme without them leaves none behind.
+CLEAR_BANNERS="mkdir -p $DIR/banners 2>/dev/null; rm -f $DIR/banners/*.png $DIR/banners/*.webp $DIR/banners/*.jpg $DIR/banners/*.jpeg 2>/dev/null; content delete --uri $URI/banners 2>/dev/null"
 
 if [ "${1:-}" = --reset ]; then
-  tv "mkdir -p $DIR 2>/dev/null; $(del config.json); $(del wallpaper.jpg); $(del wallpapers/captions.txt); $CLEAR_WALLPAPERS; printf '%s' '$REVISION' > $TMP-theme_revision; $(put theme_revision); $RESTART; echo reset" | tail -n 1
+  tv "mkdir -p $DIR 2>/dev/null; $(del config.json); $(del wallpaper.jpg); $(del wallpapers/captions.txt); $CLEAR_WALLPAPERS; $CLEAR_BANNERS; printf '%s' '$REVISION' > $TMP-theme_revision; $(put theme_revision); $RESTART; echo reset" | tail -n 1
   exit 0
 fi
 THEME="${THEME_ARG:?usage: theme.sh <theme folder> | --reset}"
@@ -103,6 +105,18 @@ if [ -f "$THEME/wallpapers/captions.txt" ]; then
   tv "$(put wallpapers/captions.txt)" >/dev/null
 else
   tv "$(del wallpapers/captions.txt)" >/dev/null
+fi
+# Tile artwork for banner_files, one picture per app named after its package (com.example.app.png).
+tv "$CLEAR_BANNERS" >/dev/null
+if [ -d "$THEME/banners" ]; then
+  for IMAGE in "$THEME"/banners/*; do
+    [ -f "$IMAGE" ] || continue
+    NAME=$(basename "$IMAGE")
+    [[ "$NAME" =~ ^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+\.(png|webp|jpg|jpeg)$ ]] \
+      || { echo "unsupported banner filename: $NAME (use <package>.png, .webp or .jpg)" >&2; exit 1; }
+    "$PY" -I b64push.py "$IMAGE" "$(stage "banners/$NAME")"
+    tv "$(put "banners/$NAME")" >/dev/null
+  done
 fi
 tv "printf '%s' '$REVISION' > $TMP-theme_revision; $(put theme_revision)" >/dev/null
 tv "$RESTART; echo applied" | tail -n 1
