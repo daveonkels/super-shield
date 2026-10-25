@@ -81,12 +81,16 @@ macOS can block a coding assistant's own connections to the LAN (Local Network p
 4. **Theme:** `tools/theme.sh themes/aurora-tint`.
 5. **Home Controls:** see [`addons/home-panel/README.md`](../addons/home-panel/README.md) for the token file and
    [`entities.example.json`](../addons/home-panel/entities.example.json).
-6. **Close ADB when done:** in Developer options, revoke USB debugging authorisations and switch Network debugging
+6. **4K interface (optional):** [`shield/ui-4k.sh`](../shield/ui-4k.sh). The SHIELD outputs 4K but draws its
+   interface at 1080p and upscales it; this draws it at 3839x2160, density 640: the same layout, with sharp text,
+   icons and banners. It survives reboots and costs memory (the launcher went from about 92 MB to 186 MB).
+   `--undo` goes back to 1080p.
+7. **Close ADB when done:** in Developer options, revoke USB debugging authorisations and switch Network debugging
    and USB debugging off. Reboot, then check with `tools/venv/bin/python -I tools/adb-closed.py <shield ip>`; it
    should say the port refused the connection.
 
 **Undo:** `./restore.sh` re-enables everything in the list, gives Home back to the stock launcher and puts the
-screensaver and Private DNS back (`--keep-launcher` keeps the new home).
+screensaver, Private DNS and the 1080p interface back (`--keep-launcher` keeps the new home and the interface size).
 
 ## Notes
 
@@ -95,7 +99,15 @@ screensaver and Private DNS back (`--keep-launcher` keeps the new home).
   `./build-and-install.sh` sets `HOME_KEY_SERVICE=1`. Holding volume still ramps with the helper on.
 - **A SHIELD has no HDMI inputs or tuner,** so the launcher hides its Inputs pill, and Live Channels needed
   `HANDLERS_ALLOW=1` past `tools/disable.sh`'s input-handler guard.
-- **After a SHIELD Experience update,** check `pm list packages -d` against the list; updates can re-enable packages.
+- **After a SHIELD Experience update,** run [`shield/check.sh`](../shield/check.sh). It only reads: listed
+  packages enabled again, Home taken back by the stock launcher, the ≡ helper switched off, the screensaver. It
+  prints the command that fixes each one. Android forgets the chosen Home whenever a launcher is enabled or
+  disabled, and on the SHIELD an enabled stock launcher wins over `set-home-activity`, so
+  `./build-and-install.sh` (which hands Home over behind its guard) is the fix for Home, not a single command.
+- **The 4K interface and `wm size reset`:** the SHIELD's 1080p interface is itself an override
+  (`persist.vendor.sys.display.resolution`), so a reset leaves a 4K screen at density 320, everything half size.
+  `shield/ui-4k.sh --undo` and `restore.sh` set 1920x1080 at 320 instead. The SHIELD refuses a forced width of
+  3840, hence 3839 (found by [ATV Optimizer](https://github.com/bryanroscoe/shield_optimizer)).
 - **Private data stays local.** `backup/`, `shots/`, `work/`, `tools/adbkey/` and any `*secret*.json` are
   git-ignored. Home Assistant tokens live in the add-on's private storage on the TV, never in the repo.
 
